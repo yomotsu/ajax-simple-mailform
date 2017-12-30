@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+form:invalid button[type="submit"] {
+	opacity: .4;
+	pointer-events: none;
+	cursor: not-allowed;
+}
+</style>
+</head>
+<body>
+
+
+<form action="sendmail.php" method="post" id="mailform">
+	<input type="text" name="name" required>
+	<input type="email" name="email" required>
+	<input type="radio" name="radio1" value="1">
+	<input type="radio" name="radio1" value="2">
+	<input type="radio" name="radio1" value="3">
+	<textarea name="comment" required></textarea>
+	<button type="submit">send</button>
+</form>
+
+<script src="sendmail.js"></script>
+
+</body>
+</html>
