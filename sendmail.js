@@ -1,15 +1,15 @@
 ( function () {
 
 	const $form = document.getElementById( 'mailform' );
-	$form.addEventListener( 'submit', function( event ) {
+
+	$form.addEventListener( 'submit', function ( event ) {
 
 		event.preventDefault();
 		const formData = new FormData();
-		const nameList = [];
 
 		$form.setAttribute( 'aria-busy', true );
 
-		Array.prototype.forEach.call( $form.elements, function( $input ) {
+		Array.prototype.forEach.call( $form.elements, function ( $input ) {
 
 			$input.disabled = true;
 
@@ -29,7 +29,7 @@
 
 			$form.setAttribute( 'aria-busy', false );
 
-			Array.prototype.forEach.call( $form.elements, function( $input ) {
+			Array.prototype.forEach.call( $form.elements, function ( $input ) {
 
 				$input.disabled = false;
 
