@@ -5,9 +5,10 @@ $REQUIRED_ITEMS = [
 	"email"
 ];
 
-$to       = "admin@yomotsu.net";
+$to       = "to@example.com";
 $from     = "no-reply@example.com";
-$subject  = " | ".$_SERVER[ "HTTP_HOST" ];
+// $subject  = "Auto-reply | ".$_SERVER[ "HTTP_HOST" ];
+$subject  = "自動返信 | ".$_SERVER[ "HTTP_HOST" ];
 $template = 
 // "Thank you for contacting us. We will be in touch with you very soon.\n".
 // "We have received the below message.\n".
@@ -52,8 +53,6 @@ if ( ! $_SERVER[ "HTTP_HOST" ] === $_POST[ "formsecret" ] ) {
 	exit;
 
 }
-
-// echo $template;
 
 // 必須項目が空になっていないかのチェック
 foreach ( $REQUIRED_ITEMS as $requiredItemKey ) {

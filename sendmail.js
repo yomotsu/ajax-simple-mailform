@@ -7,7 +7,11 @@
 		const formData = new FormData();
 		const nameList = [];
 
+		$form.setAttribute( 'aria-busy', true );
+
 		Array.prototype.forEach.call( $form.elements, function( $input ) {
+
+			$input.disabled = true;
 
 			if ( ! $input.name || formData.has( $input.name ) ) return;
 
@@ -22,6 +26,14 @@
 		xhr.onload = function () {
 
 			const json = JSON.parse( xhr.responseText );
+
+			$form.setAttribute( 'aria-busy', false );
+
+			Array.prototype.forEach.call( $form.elements, function( $input ) {
+
+				$input.disabled = false;
+
+			} );
 
 			if ( json.state === 'OK' ) {
 
