@@ -1,14 +1,14 @@
 <?php
 
-$REQUIRED_ITEMS = [
+$REQUIRED_ITEMS = array (
 	"name",
 	"email"
-];
+);
 
-$to       = "to@example.com";
-$from     = "no-reply@example.com";
-// $subject  = "Auto-reply | ".$_SERVER[ "HTTP_HOST" ];
-$subject  = "自動返信 | ".$_SERVER[ "HTTP_HOST" ];
+$to   = "to@example.com";
+$from = "no-reply@example.com";
+$subjectAdmin = "お問い合わせ | ".$_SERVER[ "HTTP_HOST" ]; // Contact Form
+$subjectUser  = "自動返信 | ".$_SERVER[ "HTTP_HOST" ]; // Auto-reply
 $template = 
 // "Thank you for contacting us. We will be in touch with you very soon.\n".
 // "We have received the below message.\n".
@@ -87,8 +87,8 @@ if ( $hasError ) {
 }
 
 if (
-	mb_send_mail( $to,               $subject, $template, $headers ) &&
-	mb_send_mail( $_POST[ "email" ], $subject, $template, $headers )
+	mb_send_mail( $to,               $subjectAdmin, $template, $headers ) &&
+	mb_send_mail( $_POST[ "email" ], $subjectUser,  $template, $headers )
 ) {
 
 	$result[ "state" ] = "OK";
