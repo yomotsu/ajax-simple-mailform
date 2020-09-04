@@ -1,4 +1,5 @@
 <?php
+define( "FILE_DIR", "_tmp/" );
 
 $REQUIRED_ITEMS = array (
 	"name",
@@ -7,31 +8,50 @@ $REQUIRED_ITEMS = array (
 
 $to   = "to@example.com";
 $from = "no-reply@example.com";
-$subjectAdmin = "お問い合わせ | ".$_SERVER[ "HTTP_HOST" ]; // Contact Form
-$subjectUser  = "自動返信 | ".$_SERVER[ "HTTP_HOST" ]; // Auto-reply
-$template = 
-// "Thank you for contacting us. We will be in touch with you very soon.\n".
-// "We have received the below message.\n".
-"お問い合わせありがとうございます。\n".
-"以下のお問い合わせ内容で、お問い合わせを受け付けました。\n".
-"内容を確認のうえ、ご返信いたします。\n".
+$subjectAdmin = "お問い合わせ | {$_SERVER[ "HTTP_HOST" ]}"; // Contact Form
+$subjectUser  = "自動返信 | {$_SERVER[ "HTTP_HOST" ]}"; // Auto-reply
+$userInfo = @gethostbyaddr( $_SERVER[ "REMOTE_ADDR" ] ) . "\n" . $_SERVER[ "HTTP_USER_AGENT" ];
+$templateAdmin = <<<EOF
+以下の内容でお問い合わせを受け付けました。
+------------------------------
+## お名前
+{$_POST[ "name" ]}
 
-"------------------------------\n".
-"## お名前\n".
-$_POST[ "name" ]."\n".
-"\n".
-"## メールアドレス\n".
-$_POST[ "email" ]."\n".
-"\n".
-"## 選択肢1\n".
-$_POST[ "radio1" ]."\n".
-"\n".
-"## お問い合わせ内容\n".
-$_POST[ "comment" ]."\n".
-"\n".
-"------------------------------\n".
-"\n".
-USERINFO()."\n";
+## メールアドレス
+{$_POST[ "email" ]}
+
+## 選択肢1
+{$_POST[ "radio1" ]}
+
+## お問い合わせ内容
+{$_POST[ "comment" ]}
+
+------------------------------
+
+{$userInfo}
+EOF;
+
+// Thank you for contacting us. We will be in touch with you very soon.
+// We have received the below message.
+$templateUser = <<<EOF
+お問い合わせありがとうございます。
+以下のお問い合わせ内容で、お問い合わせを受け付けました。
+内容を確認のうえ、ご返信いたします。
+------------------------------
+## お名前
+{$_POST[ "name" ]}
+
+## メールアドレス
+{$_POST[ "email" ]}
+
+## 選択肢1
+{$_POST[ "radio1" ]}
+
+## お問い合わせ内容
+{$_POST[ "comment" ]}
+
+------------------------------
+EOF;
 
 // -----------------------------------------------------------------------------
 
@@ -39,7 +59,8 @@ header( "content-type: application/json; charset=utf-8" );
 
 mb_language( "Japanese" );
 mb_internal_encoding( "UTF-8" );
-$headers = "From: " . $from . "\r\n";
+$headers = "Content-Type: multipart/mixed;boundary=\"__BOUNDARY__\"\nFrom: {$from}\n";
+$files = array();
 $result = array(
 	"errors" => array(),
 	"state" => 0
@@ -75,6 +96,24 @@ if (
 
 }
 
+// ファイルのアップロード
+foreach ( $_FILES as $file ) {
+
+	$uploadRes = move_uploaded_file( $file[ "tmp_name" ], FILE_DIR.$file[ "name" ] );
+
+	if( $uploadRes !== true ) {
+
+		// failed to upload a file
+		array_push( $result[ "errors" ], "file" );
+
+	} else {
+
+		array_push( $files, $file[ "name" ] );
+
+	}
+
+}
+
 $hasError = count( $result[ "errors" ] ) > 0;
 
 // エラーがあればJSONを出力して終わり
@@ -82,17 +121,21 @@ if ( $hasError ) {
 
 	$result[ "state" ] = "Error";
 	echo json_encode( $result );
+	// clean the file directory
+	foreach ( $files as $fileName ) unlink( FILE_DIR.$fileName );
 	exit;
 
 }
 
 if (
-	mb_send_mail( $to,               $subjectAdmin, $template, $headers ) &&
-	mb_send_mail( $_POST[ "email" ], $subjectUser,  $template, $headers )
+	mb_send_mail( $to,               $subjectAdmin, makeMessageBody( $templateAdmin, $files ), $headers ) &&
+	mb_send_mail( $_POST[ "email" ], $subjectUser,  makeMessageBody( $templateUser,  $files ), $headers )
 ) {
 
 	$result[ "state" ] = "OK";
 	echo json_encode( $result );
+	// clean the file directory
+	foreach ( $files as $fileName ) unlink( FILE_DIR.$fileName );
 	exit;
 
 } else {
@@ -103,9 +146,24 @@ if (
 
 }
 
+function makeMessageBody( $message, $files ) {
 
-function USERINFO(){
+	$body = "--__BOUNDARY__\n";
+	$body .= "Content-Type: text/plain; charset=\"ISO-2022-JP\"\n\n";
+	$body .= "{$message}\n";
 
-	return @gethostbyaddr( $_SERVER[ "REMOTE_ADDR" ] ) . "\n" . $_SERVER[ "HTTP_USER_AGENT" ];
+	// ファイルを添付
+	foreach ( $files as $fileName ) {
+		$body .= "--__BOUNDARY__\n";
+		$body .= "Content-Type: application/octet-stream; name=\"{$fileName}\"\n";
+		$body .= "Content-Disposition: attachment; filename=\"{$fileName}\"\n";
+		$body .= "Content-Transfer-Encoding: base64\n";
+		$body .= "\n";
+		$body .= chunk_split( base64_encode( file_get_contents( FILE_DIR.$fileName ) ) );
+	}
+
+	$body .= "--__BOUNDARY__\n";
+
+	return $body;
 
 }

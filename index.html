@@ -14,15 +14,21 @@ form:invalid button[type="submit"] {
 <body>
 
 
-<form action="sendmail.php" method="post" id="mailform">
+<form
+	action="sendmail.php"
+	method="post"
+	enctype="multipart/form-data"
+	id="mailform"
+>
 	<input type="text" name="name" required>
 	<input type="email" name="email" required>
 	<input type="radio" name="radio1" value="1">
 	<input type="radio" name="radio1" value="2">
 	<input type="radio" name="radio1" value="3">
+	<input type="file" name="file0">
+	<input type="file" name="file1">
 	<textarea name="comment" required></textarea>
 	<button type="submit">send</button>
-	<div></div>
 </form>
 
 <script src="sendmail.js"></script>

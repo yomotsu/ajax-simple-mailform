@@ -1,19 +1,26 @@
-( function () {
+( () => {
 
 	const $form = document.getElementById( 'mailform' );
 
-	$form.addEventListener( 'submit', function ( event ) {
+	$form.addEventListener( 'submit', ( event ) => {
 
 		event.preventDefault();
 		const formData = new FormData();
 
 		$form.setAttribute( 'aria-busy', true );
 
-		Array.prototype.forEach.call( $form.elements, function ( $input ) {
+		Array.prototype.forEach.call( $form.elements, ( $input ) => {
 
 			$input.disabled = true;
 
 			if ( ! $input.name || formData.has( $input.name ) ) return;
+
+			if ( $input.type === 'file' ) {
+
+				formData.append( $input.name, $input.files[ 0 ] );
+				return;
+
+			}
 
 			formData.append( $input.name, $form.elements[ $input.name ].value );
 
@@ -23,13 +30,13 @@
 
 		const xhr = new XMLHttpRequest();
 		xhr.open( 'POST', $form.action, true );
-		xhr.onload = function () {
+		xhr.onload = () => {
 
 			const json = JSON.parse( xhr.responseText );
 
 			$form.setAttribute( 'aria-busy', false );
 
-			Array.prototype.forEach.call( $form.elements, function ( $input ) {
+			Array.prototype.forEach.call( $form.elements, ( $input ) => {
 
 				$input.disabled = false;
 
