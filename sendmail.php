@@ -66,6 +66,37 @@ $result = array(
 	"state" => 0
 );
 
+/*
+// recaptcha
+$RECAPTCHA_SECRET = 'YOUR_RECAPTCHA_SECRET_KEY';
+$recaptchaParams = array(
+	'secret' => $RECAPTCHA_SECRET,
+	'response' => $_POST[ 'recaptcha-response' ],
+);
+$curl = curl_init();
+curl_setopt( $curl, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify' );
+curl_setopt( $curl, CURLOPT_POST, true );
+curl_setopt( $curl, CURLOPT_POSTFIELDS, http_build_query( $recaptchaParams ) );
+curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
+curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true) ;
+
+$captcha = json_decode( curl_exec( $curl ) );
+
+if ( $captcha->success == false ) {
+
+	$result[ "state" ] = "reCAPTCHA is not valid";
+	echo json_encode( $result );
+	exit;
+
+} else if ( $captcha->score <= 0.5 ) {
+
+	$result[ "state" ] = "reCAPTCHA is not Accepted";
+	echo json_encode( $result );
+	exit;
+
+}
+*/
+
 // bot対策: formsecretの値のチェック
 if ( ! $_SERVER[ "HTTP_HOST" ] === $_POST[ "formsecret" ] ) {
 
@@ -97,7 +128,17 @@ if (
 }
 
 // ファイルのアップロード
+$allowlist = [ 'gif', 'jpg', 'jpeg', 'png', 'pdf', 'zip' ];
 foreach ( $_FILES as $file ) {
+
+	$extension = pathinfo( $file['name'], PATHINFO_EXTENSION );
+
+	if ( ! in_array( strtolower( $extension ), $allowlist ) ) {
+
+		array_push( $result[ "errors" ], "the attachment is not allow type" );
+		continue;
+
+	}
 
 	$uploadRes = move_uploaded_file( $file[ "tmp_name" ], FILE_DIR.$file[ "name" ] );
 

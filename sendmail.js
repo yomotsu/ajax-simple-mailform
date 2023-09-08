@@ -2,9 +2,12 @@
 
 	const $form = document.getElementById( 'mailform' );
 
-	$form.addEventListener( 'submit', ( event ) => {
+	$form.addEventListener( 'submit', async( event ) => {
 
 		event.preventDefault();
+
+		// await recaptcha( $form );
+
 		const formData = new FormData();
 
 		$form.setAttribute( 'aria-busy', true );
@@ -66,3 +69,49 @@
 	} );
 
 } )();
+
+
+// function recaptcha( $form ) {
+
+// 	const recaptchaScript = Array.prototype.filter.call( document.scripts, ( s ) => /www\.google\.com\/recaptcha\/api.js/.test( s.src ) )[ 0 ];
+
+// 	return new Promise( ( resolve, reject ) => {
+
+// 		if ( ! recaptchaScript ) {
+
+// 			alert( 'recaptcha script is not loaded' );
+// 			reject();
+// 			return;
+
+// 		}
+
+// 		const sitekey = getParameterByName( 'render', recaptchaScript.src );
+// 		grecaptcha.ready( () => {
+
+// 			grecaptcha.execute( sitekey, { action: '_recaptcha' } ).then( ( token ) => {
+
+// 				const $recaptchaResponseInput = document.createElement( 'input' );
+// 				$recaptchaResponseInput.hidden = true;
+// 				$recaptchaResponseInput.name = 'recaptcha-response';
+// 				$recaptchaResponseInput.value = token;
+// 				$form.appendChild( $recaptchaResponseInput );
+// 				resolve( token );
+
+// 			} );
+
+// 		} );
+
+// 	} );
+
+// }
+
+// function getParameterByName( name, url = window.location.href ) {
+
+// 	const _name = name.replace( /[\[\]]/g, '\\$&' );
+// 	const regex = new RegExp( '[?&]' + _name + '(=([^&#]*)|&|#|$)' );
+// 	const results = regex.exec( url );
+// 	if ( ! results ) return null;
+// 	if ( ! results[ 2 ] ) return '';
+// 	return decodeURIComponent( results[ 2 ].replace( /\+/g, ' ' ) );
+
+// }
